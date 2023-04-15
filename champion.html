@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css"
+        integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
+
+    <style>
+        .card {
+            border: 1px solid black;
+            margin-bottom: 30px;
+            overflow: hidden;
+        }
+
+        .headshot {
+            overflow: hidden;
+        }
+
+        .card-title {
+            color: white;
+            background-color: black;
+            display: inline-block;
+            border-radius: 5px;
+            padding: 5px 15px 5px 15px;
+        }
+
+        .card-body {
+            background-color: #ffbf67;
+        }
+
+        .card:hover {
+            box-shadow: 8px 8px 15px #808080;
+            transform: translate(5px, 5px);
+        }
+
+        .card:hover img {
+            transform: scale(1.2);
+            transition: transform 0.5s;
+        }
+
+        .card:not(:hover) img {
+            transform: scale(1, 1);
+            transition: transform 0.3s;
+        }
+
+        .card:hover .card-body {
+            background-color: lightgreen !important;
+        }
+
+        .card:hover .card-title {
+            color: black;
+            background-color: white !important;
+        }
+    </style>
+</head>
+
+<body>
+    <div class='container-fluid'>
+        <div class='jumbotron bg-info'>
+            <h1>LOL英雄聯盟圖鑑</h1>
+        </div>
+
+        <div class='row'>
+
+        </div>
+    </div>
+
+<template id="cardPizza">
+    <div class="card" style="width: 18rem;">
+        <img src="..." class="card-img-top" alt="...">
+        <div class="card-body">
+            <h5 class="card-title">標題</h5>
+            <p class="card-text">說明</p>
+            <a href="#" class="btn btn-primary">詳細</a>
+            <a href="#" class="btn btn-danger">影片</a>
+        </div>
+    </div>
+</template>
+
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
+        integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
+        integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
+        crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"
+        integrity="sha384-OgVRvuATP1z7JjHLkuOU7Xw704+h835Lr+6QL9UvYjZE3Ipu6Tp75j7Bh/kR0JKI"
+        crossorigin="anonymous"></script>
+
+
+
+    <script>
+        let row, cardTemplate;
+        const url = "https://ddragon.leagueoflegends.com/cdn/10.22.1/data/zh_TW/champion.json";
+        
+        let champion = {};
+        let heroObject = {};
+        let heroDataArray = [];
+    </script>
+
+
+    <script type='module'>
+        import { $g } from '../Modules/helpers.js';
+
+        row = $g('.row');
+        cardTemplate = $g('#cardPizza'); // 原始範本
+
+
+        window.onload=function(){
+            fetchJson(url);
+        }
+        
+        function getCard(title, imgurl){
+                let coloneCard = cardTemplate.content.cloneNode(true);
+                coloneCard.querySelector("img").src = imgurl;
+                coloneCard.querySelector("h5").innerHTML = title;
+
+                coloneCard.querySelector(".btn").addEventListener('click',function(){
+                    alert(title);
+                });
+                return coloneCard;
+        }
+
+        function fetchJson(uri) {
+            fetch(uri)
+                .then(function (response) {
+                    if (!response.ok) {
+                        const err = new Error(`找不到資源檔 : ${uri}`);
+                        err.response = response;
+                        throw err;
+                    }
+                    else {
+                        return response.json();
+                    }
+                })
+                .then(result => {
+                    champion = result;
+                    heroObject = champion.data;
+                    heroDataArray = Object.values(heroObject);
+                    heroDataArray.forEach(hero => {
+                        let imgUrl = `https://ddragon.leagueoflegends.com/cdn/img/champion/splash/${hero.id}_0.jpg`
+                        row.append( getCard(hero.id, imgUrl));
+                    });
+                })
+                .catch(ex => {
+                    console.dir(ex);
+                    console.log(ex.response);
+                    document.body.append(ex.message);
+                });
+        }
+    </script>
+</body>
+
+</html>
