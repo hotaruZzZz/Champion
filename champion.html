@@ -4,57 +4,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>LOL英雄聯盟圖鑑</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css"
         integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
-
-    <style>
-        .card {
-            border: 1px solid black;
-            margin-bottom: 30px;
-            overflow: hidden;
-        }
-
-        .headshot {
-            overflow: hidden;
-        }
-
-        .card-title {
-            color: white;
-            background-color: black;
-            display: inline-block;
-            border-radius: 5px;
-            padding: 5px 15px 5px 15px;
-        }
-
-        .card-body {
-            background-color: #ffbf67;
-        }
-
-        .card:hover {
-            box-shadow: 8px 8px 15px #808080;
-            transform: translate(5px, 5px);
-        }
-
-        .card:hover img {
-            transform: scale(1.2);
-            transition: transform 0.5s;
-        }
-
-        .card:not(:hover) img {
-            transform: scale(1, 1);
-            transition: transform 0.3s;
-        }
-
-        .card:hover .card-body {
-            background-color: lightgreen !important;
-        }
-
-        .card:hover .card-title {
-            color: black;
-            background-color: white !important;
-        }
-    </style>
+    <link rel="stylesheet" href="champion.css">
 </head>
 
 <body>
@@ -63,22 +16,51 @@
             <h1>LOL英雄聯盟圖鑑</h1>
         </div>
 
-        <div class='row'>
+        <div class='row justify-content-center'>
 
         </div>
     </div>
 
-<template id="cardPizza">
-    <div class="card" style="width: 18rem;">
+<template id="hero">
+    <div class="card" style="width: 20%; margin: 10px;">
         <img src="..." class="card-img-top" alt="...">
         <div class="card-body">
             <h5 class="card-title">標題</h5>
             <p class="card-text">說明</p>
-            <a href="#" class="btn btn-primary">詳細</a>
-            <a href="#" class="btn btn-danger">影片</a>
+            <a href="#" id="detail" class="btn btn-primary" data-toggle="modal" data-target="#heroModal" >詳細</a>
+            <a href="#" id="video" class="btn btn-danger" data-toggle="modal" data-target="#heroModal">影片</a>
         </div>
     </div>
+        <!-- Modal -->
+        <div class="modal fade" id="heroModal" tabindex="-1" aria-labelledby="heroModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                <div class="modal-header bg-primary">
+                    <h5 class="modal-title" id="heroModalLabel">Modal title</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <!-- <iframe width="80%" src="https://www.youtube.com/embed/Xw46WPuXMk0" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe> -->
+                    <img class="heroimg" width="100%" src="https://picsum.photos/300/200/?random=10">
+                    <p class="hp">HP:</p>
+                    <p class="movespeed">Move Speed:</p>
+                    <p class="armor">Armor:</p>
+                    <p class="spellblock">Spell Block:</p>
+                    <p class="attackrange">Attack Range:</p>
+                </div>
+                <div class="modal-footer">
+                    <button  type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+                </div>
+            </div>
+            </div>
+
+
 </template>
+
+
 
 
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
@@ -107,21 +89,38 @@
         import { $g } from '../Modules/helpers.js';
 
         row = $g('.row');
-        cardTemplate = $g('#cardPizza'); // 原始範本
+        cardTemplate = $g('#hero'); // 原始範本
 
 
         window.onload=function(){
             fetchJson(url);
         }
         
-        function getCard(title, imgurl){
+        function getCard(data, imgurl){
                 let coloneCard = cardTemplate.content.cloneNode(true);
                 coloneCard.querySelector("img").src = imgurl;
-                coloneCard.querySelector("h5").innerHTML = title;
+                coloneCard.querySelector("h5").innerHTML =   data.id + '-' + data.name;
+                coloneCard.querySelector(".heroimg").src = imgurl;
+                if(data.blurb.length > 30){
+                    coloneCard.querySelector(".card-text").innerHTML =  data.blurb.substring(0,30) + '...';
+                }
+                else{
+                    coloneCard.querySelector(".card-text").innerHTML =  data.blurb;
+                }
+                // 更改屬性
+                let dt = coloneCard.querySelector("#detail");
+                dt.setAttribute("data-target", '#' + data.id+'Modal');
+                dt.setAttribute("id", data.id+'Detail');
+                let dm = coloneCard.querySelector("#heroModal");
+                dm.setAttribute("id", data.id+'Modal');
 
-                coloneCard.querySelector(".btn").addEventListener('click',function(){
-                    alert(title);
-                });
+                coloneCard.querySelector("#heroModalLabel").innerHTML = data.id;
+                coloneCard.querySelector(".hp").innerHTML = 'HP: ' + data.stats.hp;
+                coloneCard.querySelector(".armor").innerHTML = 'Armor: ' + data.stats.armor;
+                coloneCard.querySelector(".movespeed").innerHTML = 'Move Speed: ' +  data.stats.movespeed;
+                coloneCard.querySelector(".spellblock").innerHTML = 'Spell Block: ' + data.stats.spellblock;
+                coloneCard.querySelector(".attackrange").innerHTML = 'Attack Range: ' + data.stats.attackrange;
+                
                 return coloneCard;
         }
 
@@ -143,7 +142,7 @@
                     heroDataArray = Object.values(heroObject);
                     heroDataArray.forEach(hero => {
                         let imgUrl = `https://ddragon.leagueoflegends.com/cdn/img/champion/splash/${hero.id}_0.jpg`
-                        row.append( getCard(hero.id, imgUrl));
+                        row.append( getCard(hero, imgUrl));
                     });
                 })
                 .catch(ex => {
